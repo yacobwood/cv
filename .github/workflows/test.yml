@@ -7,11 +7,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Browsers come preinstalled; keep this tag in step with @playwright/test in package.json
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - run: npx playwright test
+        env:
+          HOME: /root
