@@ -1,12 +1,32 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-// Never hit the real counter from tests: stub the tracking script and the count endpoint
+const COUNTER = 'https://abacus.jasoncameron.dev';
+const cors = { 'Access-Control-Allow-Origin': '*' };
+
+// Stub the live counter: /hit and /get return `value`, /stream emits each of `stream`
+async function stubCounter(page: Page, value: number, stream: number[] = [value]) {
+  const calls: string[] = [];
+  await page.route(`${COUNTER}/**`, (route) => {
+    const path = new URL(route.request().url()).pathname;
+    calls.push(path);
+    if (path.startsWith('/stream/')) {
+      return route.fulfill({
+        headers: { ...cors, 'Content-Type': 'text/event-stream' },
+        body: stream.map((v) => `data: {"value":${v}}\n\n`).join('')
+      });
+    }
+    return route.fulfill({ json: { value }, headers: cors });
+  });
+  return calls;
+}
+
+// Never touch the real counters from tests
 test.beforeEach(async ({ page }) => {
   await page.route('https://gc.zgo.at/**', (route) =>
     route.fulfill({ contentType: 'text/javascript', body: '' }));
-  await page.route('https://*.goatcounter.com/**', (route) =>
-    route.fulfill({ json: { count: '1,234' }, headers: { 'Access-Control-Allow-Origin': '*' } }));
+  await page.route('https://*.goatcounter.com/**', (route) => route.fulfill({ status: 204 }));
+  await stubCounter(page, 1234);
 });
 
 test.describe('CV page', () => {
@@ -158,27 +178,48 @@ test.describe('Accessibility', () => {
   }
 });
 
-test.describe('Visit counter', () => {
-  test('shows the total from GoatCounter', async ({ page }) => {
+test.describe('Live run counter', () => {
+  test('counts the first visit and shows the total', async ({ page }) => {
+    const calls = await stubCounter(page, 1234);
+    await page.goto('/');
+    await expect(page.locator('#runCount')).toHaveText('· 1,234 runs');
+    expect(calls).toContain('/hit/yacobwood-cv/runs');
+  });
+
+  test('does not count a refresh in the same session', async ({ page }) => {
+    const calls = await stubCounter(page, 1234);
     await page.goto('/');
     await expect(page.locator('#runCount')).toBeVisible();
-    await expect(page.locator('#runCount')).toHaveText('· 1,234 runs');
+    calls.length = 0;
+
+    await page.reload();
+    await expect(page.locator('#runCount')).toBeVisible();
+    expect(calls).toContain('/get/yacobwood-cv/runs');
+    expect(calls).not.toContain('/hit/yacobwood-cv/runs');
+  });
+
+  test('ticks up live when the stream reports a new visit', async ({ page }) => {
+    await stubCounter(page, 1234, [1234, 1235]);
+    await page.goto('/');
+    await expect(page.locator('#runCount')).toHaveText('· 1,235 runs');
+    await expect(page.locator('#runCount')).toHaveClass(/tick/);
   });
 
   test('stays hidden while the count is zero', async ({ page }) => {
-    await page.route('https://*.goatcounter.com/**', (route) =>
-      route.fulfill({ json: { count: '0' }, headers: { 'Access-Control-Allow-Origin': '*' } }));
-    const counter = page.waitForResponse('**/counter/TOTAL.json');
+    await stubCounter(page, 0);
+    const hit = page.waitForResponse('**/hit/yacobwood-cv/runs');
     await page.goto('/');
-    await counter;
+    await hit;
     await page.evaluate(() => new Promise(requestAnimationFrame));
     await expect(page.locator('#runCount')).toBeHidden();
   });
 
-  test('stays hidden when the counter request fails', async ({ page }) => {
-    await page.route('https://*.goatcounter.com/**', (route) => route.fulfill({ status: 500 }));
+  test('stays hidden when the counter is down', async ({ page }) => {
+    await page.route(`${COUNTER}/**`, (route) => route.fulfill({ status: 500, headers: cors }));
+    const hit = page.waitForResponse('**/hit/yacobwood-cv/runs');
     await page.goto('/');
-    await expect(page.locator('h1')).toBeVisible();
+    await hit;
+    await page.evaluate(() => new Promise(requestAnimationFrame));
     await expect(page.locator('#runCount')).toBeHidden();
   });
 });

@@ -137,20 +137,52 @@
     chip.addEventListener('click', function () { applyFilter(chip.getAttribute('data-filter')); });
   });
 
-  /* ---------- Visit counter (GoatCounter) ---------- */
-  // Reads the endpoint from the tracking script tag so the site code lives in one place.
-  // Stays hidden if the request fails, so a blocked counter never shows a broken label.
-  var gcScript = document.querySelector('script[data-goatcounter]');
+  /* ---------- Live run counter (Abacus) ---------- */
+  // GoatCounter's public count is cached for hours, so the on-page number comes from Abacus,
+  // which returns the new total instantly and streams updates while the page is open.
+  // GoatCounter still records every visit for the private dashboard.
+  var COUNTER_API = 'https://abacus.jasoncameron.dev';
+  var COUNTER_KEY = '/yacobwood-cv/runs';
   var runCount = document.getElementById('runCount');
-  if (gcScript && runCount && window.fetch) {
-    var counterUrl = gcScript.getAttribute('data-goatcounter').replace(/\/count$/, '/counter/TOTAL.json');
-    fetch(counterUrl)
+
+  if (runCount && window.fetch) {
+    var runValue = runCount.querySelector('b');
+    var shown = 0;
+
+    var showRuns = function (value) {
+      value = Number(value);
+      // Hide rather than show "0 runs" or a broken label
+      if (!value || value <= 0) return;
+      var grew = shown > 0 && value > shown;
+      shown = value;
+      runValue.textContent = value.toLocaleString('en-GB');
+      runCount.hidden = false;
+      if (grew) {
+        runCount.classList.remove('tick');
+        void runCount.offsetWidth; // restart the pulse animation
+        runCount.classList.add('tick');
+      }
+    };
+
+    // Count each visitor once per browser session so refreshes don't inflate the number
+    var alreadyCounted = false;
+    try { alreadyCounted = sessionStorage.getItem('cv-run-counted') === '1'; } catch (e) {}
+
+    fetch(COUNTER_API + (alreadyCounted ? '/get' : '/hit') + COUNTER_KEY)
       .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
       .then(function (data) {
-        // A fresh or cached counter reports "0"; showing "0 runs" would look broken
-        if (!data || !parseInt(String(data.count).replace(/\D/g, ''), 10)) return;
-        runCount.querySelector('b').textContent = data.count;
-        runCount.hidden = false;
+        if (!alreadyCounted) {
+          try { sessionStorage.setItem('cv-run-counted', '1'); } catch (e) {}
+        }
+        showRuns(data && data.value);
+
+        // Live updates: tick up when someone else opens the page
+        if (!window.EventSource) return;
+        var stream = new EventSource(COUNTER_API + '/stream' + COUNTER_KEY);
+        stream.onmessage = function (event) {
+          try { showRuns(JSON.parse(event.data).value); } catch (e) {}
+        };
+        window.addEventListener('pagehide', function () { stream.close(); });
       })
       .catch(function () {});
   }

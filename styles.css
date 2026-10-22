@@ -226,6 +226,18 @@ h3 { font-size: 1rem; }
 .report-head h2 { font-family: var(--mono); margin-bottom: 6px; }
 .meta { margin: 0; color: var(--muted); font-size: .9rem; }
 .meta b { color: var(--text); font-family: var(--mono); font-weight: 600; }
+.live-dot {
+  display: inline-block; width: 7px; height: 7px; margin-right: 6px; vertical-align: 1px;
+  border-radius: 50%; background: var(--passed);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--passed) 60%, transparent);
+  animation: live-pulse 2s ease-out infinite;
+}
+@keyframes live-pulse { 70%, 100% { box-shadow: 0 0 0 6px transparent; } }
+#runCount.tick b { animation: run-tick 1.2s ease-out; }
+@keyframes run-tick { 0% { color: var(--passed); text-shadow: 0 0 10px var(--passed); } 100% { color: var(--text); } }
+@media (prefers-reduced-motion: reduce) {
+  .live-dot, #runCount.tick b { animation: none; }
+}
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
