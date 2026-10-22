@@ -97,6 +97,17 @@ test.describe('Terminal', () => {
     await expect(terminal).toContainText(/\d+ passed/);
   });
 
+  test('per-file counts add up to the total', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    const text = await page.locator('#terminal').innerText();
+    const total = Number(text.match(/Running (\d+) tests/)![1]);
+    const perFile = [...text.matchAll(/\.spec\.ts (\d+) tests?/g)].map((m) => Number(m[1]));
+    expect(perFile).toHaveLength(8);
+    expect(perFile.reduce((a, b) => a + b, 0)).toBe(total);
+    await expect(page.locator('[data-count="all"]')).toHaveText(String(total));
+  });
+
   test('finishes animating on its own', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#terminal')).toHaveAttribute('data-done', 'true', { timeout: 10_000 });

@@ -201,7 +201,7 @@ h3 { font-size: 1rem; }
 .terminal-bar em { margin-left: auto; font: .75rem var(--mono); color: #8b949e; font-style: normal; }
 .terminal-body {
   margin: 0; padding: 16px;
-  min-height: 15.5em;
+  min-height: 28.5em;
   font-size: clamp(.68rem, 2.6vw, .82rem); line-height: 1.65;
   color: var(--terminal-text);
   white-space: pre-wrap; word-break: break-word;

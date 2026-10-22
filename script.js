@@ -51,21 +51,32 @@
   /* ---------- Terminal run ---------- */
   var terminal = document.getElementById('terminal');
   var command = 'npx playwright test jacob-wood.spec.ts';
+  function plural(n, word) { return n + ' ' + word + (n === 1 ? '' : 's'); }
+
+  // One line per file, oldest job first, so the per-file counts add up to the totals below
+  var fileLines = Array.prototype.map.call(specs, function (s) {
+    var name = s.querySelector('.spec-file').textContent.trim();
+    var date = s.querySelector('.spec-date').textContent.trim();
+    var n = s.querySelectorAll('[data-status]').length;
+    return '  <span class="ok">✓</span> ' + name + ' <span class="dim">' + plural(n, 'test') + ' · ' + date + '</span>';
+  }).reverse();
+
+  var skillPills = report.querySelectorAll('#skills [data-status]');
+  var skillsRunning = report.querySelectorAll('#skills [data-status="running"]').length;
+  fileLines.push('  <span class="ok">✓</span> skills.spec.ts <span class="dim">' + plural(skillPills.length, 'test') +
+    (skillsRunning ? ' · ' + skillsRunning + ' running' : '') + '</span>');
+  fileLines.push('  <span class="dim">- hobbies.spec.ts ' + plural(counts.skipped, 'test') + ' · skipped</span>');
+
   var output = [
-    '<span class="dim">Running ' + counts.all + ' tests using 1 worker</span>',
-    '',
-    '  <span class="ok">✓</span> argos.spec.ts <span class="dim">(2010 - 2012)</span>',
-    '  <span class="ok">✓</span> synectics.spec.ts <span class="dim">(2012 - 2015)</span>',
-    '  <span class="ok">✓</span> easyfundraising.spec.ts <span class="dim">(2015 - 2021)</span>',
-    '  <span class="ok">✓</span> koodoo.spec.ts <span class="dim">(2021 - 2022)</span>',
-    '  <span class="ok">✓</span> toca-social.spec.ts <span class="dim">(2022 - 2024)</span>',
-    '  <span class="ok">✓</span> altovita.spec.ts <span class="dim">(2024 - present)</span>',
+    '<span class="dim">Running ' + counts.all + ' tests across ' + fileLines.length + ' files using 1 worker</span>',
+    ''
+  ].concat(fileLines, [
     '',
     '  <span class="run">' + counts.running + ' running</span>',
     '  <span class="dim">' + counts.skipped + ' skipped</span>',
     '  <span class="sum">' + counts.passed + ' passed</span> <span class="dim">(16y)</span>',
     '<span class="dim">  Serving HTML report below ↓</span>'
-  ];
+  ]);
   var promptHtml = '<span class="prompt">❯</span> ';
 
   function renderFinal() {
