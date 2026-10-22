@@ -363,7 +363,7 @@ h3 { font-size: 1rem; }
   box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .35);
 }
 
-/* ---------- Contact + footer ---------- */
+/* ---------- Contact ---------- */
 .code {
   margin: 0; padding: 16px;
   white-space: pre-wrap; overflow-wrap: break-word;
@@ -379,9 +379,8 @@ h3 { font-size: 1rem; }
 .code .str { color: var(--code-str); }
 .code .cm { color: var(--muted); font-style: italic; }
 
-.footer { padding-top: 56px; padding-bottom: 40px; color: var(--muted); font-size: .85rem; }
-.footer a, .card p a { text-decoration: underline; text-underline-offset: 2px; }
-.footer p { border-top: 1px solid var(--border); padding-top: 20px; margin: 0; }
+.contact { padding-bottom: 72px; }
+.card p a { text-decoration: underline; text-underline-offset: 2px; }
 
 .print-contact { display: none; }
 
@@ -400,7 +399,7 @@ h3 { font-size: 1rem; }
   }
   @page { size: A4; margin: 12mm 12mm; }
   body { font-size: 9.5pt; line-height: 1.4; }
-  .topbar, .terminal, .cta-row, .chips, .empty, .legend, .footer, .contact .code, .card .link { display: none !important; }
+  .topbar, .terminal, .cta-row, .chips, .empty, .legend, .contact .code, .card .link { display: none !important; }
   .wrap { max-width: none; padding: 0; }
   .block, #report { padding-top: 14px; }
   #skills { break-before: page; padding-top: 0; }
