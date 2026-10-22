@@ -1,6 +1,14 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+// Never hit the real counter from tests: stub the tracking script and the count endpoint
+test.beforeEach(async ({ page }) => {
+  await page.route('https://gc.zgo.at/**', (route) =>
+    route.fulfill({ contentType: 'text/javascript', body: '' }));
+  await page.route('https://*.goatcounter.com/**', (route) =>
+    route.fulfill({ json: { count: '1,234' }, headers: { 'Access-Control-Allow-Origin': '*' } }));
+});
+
 test.describe('CV page', () => {
   test('loads with the right heading and no console errors', async ({ page }) => {
     const errors: string[] = [];
@@ -148,4 +156,19 @@ test.describe('Accessibility', () => {
       expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(', ')}`)).toEqual([]);
     });
   }
+});
+
+test.describe('Visit counter', () => {
+  test('shows the total from GoatCounter', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#runCount')).toBeVisible();
+    await expect(page.locator('#runCount')).toHaveText('· 1,234 runs');
+  });
+
+  test('stays hidden when the counter request fails', async ({ page }) => {
+    await page.route('https://*.goatcounter.com/**', (route) => route.fulfill({ status: 500 }));
+    await page.goto('/');
+    await expect(page.locator('h1')).toBeVisible();
+    await expect(page.locator('#runCount')).toBeHidden();
+  });
 });

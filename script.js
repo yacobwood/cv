@@ -137,6 +137,23 @@
     chip.addEventListener('click', function () { applyFilter(chip.getAttribute('data-filter')); });
   });
 
+  /* ---------- Visit counter (GoatCounter) ---------- */
+  // Reads the endpoint from the tracking script tag so the site code lives in one place.
+  // Stays hidden if the request fails, so a blocked counter never shows a broken label.
+  var gcScript = document.querySelector('script[data-goatcounter]');
+  var runCount = document.getElementById('runCount');
+  if (gcScript && runCount && window.fetch) {
+    var counterUrl = gcScript.getAttribute('data-goatcounter').replace(/\/count$/, '/counter/TOTAL.json');
+    fetch(counterUrl)
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
+      .then(function (data) {
+        if (!data || !data.count) return;
+        runCount.querySelector('b').textContent = data.count;
+        runCount.hidden = false;
+      })
+      .catch(function () {});
+  }
+
   /* ---------- Print: expand everything ---------- */
   var printOpenState = [];
   window.addEventListener('beforeprint', function () {
