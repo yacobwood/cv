@@ -1,0 +1,14 @@
+{
+  "name": "jacob-wood-cv",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "node scripts/serve.mjs",
+    "test": "playwright test",
+    "pdf": "node scripts/make-pdf.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@playwright/test": "^1.55.0"
+  }
+}

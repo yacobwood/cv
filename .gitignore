@@ -1,0 +1,5 @@
+node_modules/
+test-results/
+playwright-report/
+# Original CV contains a phone number - keep it out of the public repo
+JacobWoodCV.pdf
