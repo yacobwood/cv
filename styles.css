@@ -365,13 +365,19 @@ h3 { font-size: 1rem; }
 
 /* ---------- Contact + footer ---------- */
 .code {
-  margin: 0; padding: 16px; overflow-x: auto;
+  margin: 0; padding: 16px;
+  white-space: pre-wrap; overflow-wrap: break-word;
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
   font-size: .88rem; line-height: 1.7;
+}
+@media (max-width: 640px) {
+  /* Scale with the viewport so the longest line fits a phone without wrapping */
+  .code { padding: 12px; font-size: clamp(.6rem, 2.75vw, .88rem); }
 }
 .code .kw { color: var(--code-kw); }
 .code .fn { color: var(--code-fn); }
 .code .str { color: var(--code-str); }
+.code .cm { color: var(--muted); font-style: italic; }
 
 .footer { padding-top: 56px; padding-bottom: 40px; color: var(--muted); font-size: .85rem; }
 .footer a, .card p a { text-decoration: underline; text-underline-offset: 2px; }

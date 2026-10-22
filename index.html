@@ -286,7 +286,9 @@
     <p class="eyebrow">Contact</p>
     <h2>Let's talk</h2>
     <pre class="code"><span class="kw">await</span> page.<span class="fn">goto</span>(<span class="str">'mailto:jake@woodski.uk'</span>);
-<span class="kw">await</span> <span class="fn">expect</span>(jacob).<span class="fn">toBeAvailable</span>();</pre>
+<span class="kw">await</span> <span class="fn">expect</span>(jacob).<span class="fn">toBeAvailable</span>();
+<span class="cm">// A Promise: every message gets a reply</span>
+<span class="kw">await</span> <span class="fn">expect</span>(jacob.<span class="fn">reply</span>()).resolves.<span class="fn">toBeTruthy</span>();</pre>
     <div class="cta-row">
       <a class="btn primary" href="mailto:jake@woodski.uk">jake@woodski.uk</a>
       <a class="btn ghost" href="https://www.linkedin.com/in/jacobajwood" target="_blank" rel="noopener">LinkedIn ↗</a>
