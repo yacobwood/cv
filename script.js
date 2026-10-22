@@ -147,7 +147,8 @@
     fetch(counterUrl)
       .then(function (res) { return res.ok ? res.json() : Promise.reject(res.status); })
       .then(function (data) {
-        if (!data || !data.count) return;
+        // A fresh or cached counter reports "0"; showing "0 runs" would look broken
+        if (!data || !parseInt(String(data.count).replace(/\D/g, ''), 10)) return;
         runCount.querySelector('b').textContent = data.count;
         runCount.hidden = false;
       })

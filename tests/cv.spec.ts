@@ -165,6 +165,16 @@ test.describe('Visit counter', () => {
     await expect(page.locator('#runCount')).toHaveText('· 1,234 runs');
   });
 
+  test('stays hidden while the count is zero', async ({ page }) => {
+    await page.route('https://*.goatcounter.com/**', (route) =>
+      route.fulfill({ json: { count: '0' }, headers: { 'Access-Control-Allow-Origin': '*' } }));
+    const counter = page.waitForResponse('**/counter/TOTAL.json');
+    await page.goto('/');
+    await counter;
+    await page.evaluate(() => new Promise(requestAnimationFrame));
+    await expect(page.locator('#runCount')).toBeHidden();
+  });
+
   test('stays hidden when the counter request fails', async ({ page }) => {
     await page.route('https://*.goatcounter.com/**', (route) => route.fulfill({ status: 500 }));
     await page.goto('/');
