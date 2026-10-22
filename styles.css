@@ -254,29 +254,39 @@ h3 { font-size: 1rem; }
   background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
   overflow: hidden;
 }
+.spec.current { border-left: 3px solid var(--accent); }
 .spec summary {
-  display: grid; grid-template-columns: auto 1fr; gap: 2px 12px;
-  padding: 14px 16px; cursor: pointer; list-style: none;
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center;
+  padding: 16px 18px; cursor: pointer; list-style: none;
 }
 .spec summary::-webkit-details-marker { display: none; }
 .spec summary::before {
-  content: "›"; grid-row: span 2; align-self: center;
-  font: 600 1.2rem var(--mono); color: var(--muted);
+  content: "›"; grid-row: span 2;
+  font: 600 1.3rem/1 var(--mono); color: var(--muted);
   transition: transform .15s;
 }
-.spec[open] summary::before { transform: rotate(90deg); }
+.spec[open] summary::before { transform: rotate(90deg); color: var(--accent); }
 .spec summary:hover { background: var(--surface-2); }
-.spec-file { display: inline-flex; align-items: center; gap: 8px; font: 600 .95rem var(--mono); }
-.spec-title { grid-column: 2; color: var(--muted); font-size: .9rem; }
-.spec-date { grid-column: 2; font: .8rem var(--mono); color: var(--muted); white-space: nowrap; }
+.spec-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.spec-file { display: inline-flex; align-items: center; gap: 7px; font: .75rem var(--mono); color: var(--muted); }
+.spec-file .dot { width: 7px; height: 7px; }
+.spec-title { font-size: 1.08rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+.spec-company { color: var(--accent); font-weight: 600; white-space: nowrap; }
+.spec-date {
+  grid-column: 2; justify-self: start;
+  font: .75rem var(--mono); color: var(--muted); white-space: nowrap;
+  padding: 3px 9px; border: 1px solid var(--border); border-radius: 999px;
+}
+.spec.current .spec-date { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 @media (min-width: 720px) {
-  .spec summary { grid-template-columns: auto auto 1fr auto; align-items: center; }
+  .spec summary { grid-template-columns: auto 1fr auto; }
   .spec summary::before { grid-row: auto; }
-  .spec-title, .spec-date { grid-column: auto; }
-  .spec-date { justify-self: end; }
+  .spec-date { grid-column: auto; justify-self: end; }
 }
 
 .tests { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.spec .tests { background: var(--bg); padding: 4px 0; }
+.spec .test { border-bottom-color: transparent; padding-top: 8px; padding-bottom: 8px; color: color-mix(in srgb, var(--text) 88%, var(--muted)); }
 .test {
   display: grid; grid-template-columns: 20px 1fr auto; gap: 10px; align-items: baseline;
   padding: 10px 16px 10px 20px; border-bottom: 1px solid var(--border);
@@ -398,6 +408,12 @@ h3 { font-size: 1rem; }
   .is-hidden { display: revert !important; }
   .spec, .suite, .card, .badge, .skip-block, .setup { box-shadow: none; break-inside: avoid; }
   .spec summary { padding: 6px 10px; }
+  .spec-title { font-size: 10.5pt; }
+  .spec-file { display: none; }
+  .spec .test { padding: 3px 10px; }
+  .spec-date { padding: 1px 7px; }
+  .spec .tests { padding: 0; }
+  .spec.current { border-left-width: 1px; }
   .spec summary::before { display: none; }
   .spec > .tests { display: block !important; }
   .test { padding: 3px 10px; font-size: 9pt; }
